@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "font.h"
 
 #define SCREEN_WIDTH 400
@@ -42,8 +42,8 @@ void newGame() {
     state.p1 = (rect) {5, SCREEN_HEIGHT / 2 - 20, 5, 40};
     state.p2 = (rect) {SCREEN_WIDTH - 10, SCREEN_HEIGHT / 2 - 20, 5, 40};
     state.ball = (rect) {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 5, 5};
-    state.ballVel.x = 1.0f;
-    state.ballVel.y = 1.0f;
+    state.ballVel.x = 0.3f;
+    state.ballVel.y = 0.3f;
     state.score1 = 0;
     state.score2 = 0;
     state.wins1 = 0;
@@ -52,7 +52,7 @@ void newGame() {
 }
 
 void player(int x, int y, uint32_t color) {
-    // Draw player 1
+    // Draw player
     for(int i = 0; i < state.p1.w; i++) {
         for(int j = 0; j < state.p1.h; j++) {
             state.pixels[(x + i) + (y + j) * SCREEN_WIDTH] = color;
@@ -77,7 +77,7 @@ void ball(int x, int y, uint32_t color) {
     }
 }
 
-void update() {
+void update(float deltaTime) {
     state.ball.x += state.ballVel.x;
     state.ball.y += state.ballVel.y;
 
@@ -108,7 +108,6 @@ void render() {
     // TODO: Make a better font system
     player(state.p1.x, state.p1.y, 0xff00ffff);
     player(state.p2.x, state.p2.y, 0xff00ffff);
-    update();
     ball(state.ball.x, state.ball.y, 0xff00ffff);
     render_font(state.pixels, (SCREEN_WIDTH / 2) - 2, 0, state.score1, SCREEN_WIDTH);
     render_font(state.pixels, (SCREEN_WIDTH / 2) + 1, 0, state.score2, SCREEN_WIDTH);
@@ -179,16 +178,16 @@ int main(int argc, char *argv[]) {
 
         const uint8_t *keys = SDL_GetKeyboardState(NULL);
         if (keys[SDL_SCANCODE_W] && state.p1.y > 0) {
-            state.p1.y -= 0.1f * deltaTime;
+            state.p1.y -= 0.3f * deltaTime;
         }
         if (keys[SDL_SCANCODE_S] && state.p1.y < SCREEN_HEIGHT - state.p1.h) {
-            state.p1.y += 0.1f * deltaTime;
+            state.p1.y += 0.3f * deltaTime;
         }
         if (keys[SDL_SCANCODE_UP] && state.p2.y > 0) {
-            state.p2.y -= 0.1f * deltaTime;
+            state.p2.y -= 0.3f * deltaTime;
         }
         if (keys[SDL_SCANCODE_DOWN] && state.p2.y < SCREEN_HEIGHT - state.p2.h) {
-            state.p2.y += 0.1f * deltaTime;
+            state.p2.y += 0.3f * deltaTime;
         }
         if (keys[SDL_SCANCODE_ESCAPE]) {
             state.quit = true;
@@ -221,6 +220,7 @@ int main(int argc, char *argv[]) {
         }
 
         memset(state.pixels, 0, sizeof(state.pixels));
+        update(deltaTime);
         render();
 
         SDL_UpdateTexture(state.texture, NULL, state.pixels, SCREEN_WIDTH * 4);
